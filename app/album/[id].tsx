@@ -1,6 +1,7 @@
 import MediaCard from "@/components/gallery/MediaCard";
 import { useGallery } from "@/context/GalleryContext";
 import type { MediaItem, MediaType } from "@/types/gallery";
+import { setViewerItems } from "@/utils/viewerItems";
 import { Ionicons } from "@expo/vector-icons";
 import * as MediaLibrary from "expo-media-library";
 import { router, useLocalSearchParams } from "expo-router";
@@ -76,12 +77,12 @@ function buildSections(items: MediaItem[]): DateSection[] {
   });
 }
 
-function RowItem({ row }: { row: MediaRow }) {
+function RowItem({ row, onPress }: { row: MediaRow; onPress: (item: MediaItem) => void }) {
   return (
     <View style={{ flexDirection: "row" }}>
       {row.map((item, col) =>
         item ? (
-          <MediaCard key={item.id} item={item} index={col} />
+          <MediaCard key={item.id} item={item} index={col} onPress={onPress} />
         ) : (
           <View
             key={`e-${col}`}
@@ -172,9 +173,14 @@ export default function AlbumScreen() {
 
   const sections = useMemo(() => buildSections(items), [items]);
 
+  const handleItemPress = useCallback((item: MediaItem) => {
+    setViewerItems(items);
+    router.push({ pathname: '/viewer/[id]', params: { id: item.id } });
+  }, [items]);
+
   const renderItem = useCallback(
-    ({ item }: { item: MediaRow }) => <RowItem row={item} />,
-    [],
+    ({ item }: { item: MediaRow }) => <RowItem row={item} onPress={handleItemPress} />,
+    [handleItemPress],
   );
 
   const renderSectionHeader = useCallback(

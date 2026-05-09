@@ -3,6 +3,8 @@ import React from 'react';
 import { Dimensions, StyleSheet } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
+  runOnJS,
+  useAnimatedReaction,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
@@ -37,9 +39,15 @@ function clamped(tx: number, ty: number, s: number) {
 
 // ─── component ────────────────────────────────────────────────────────────────
 
-interface Props { uri: string }
+interface Props {
+  uri: string;
+  /** Disable to let the outer FlatList handle horizontal swipes (not zoomed). */
+  panEnabled?: boolean;
+  /** Fires on the JS thread when zoom state crosses the 1× boundary. */
+  onZoomChange?: (isZoomed: boolean) => void;
+}
 
-export default function ImageViewer({ uri }: Props) {
+export default function ImageViewer({ uri, panEnabled = true, onZoomChange }: Props) {
   // Committed transform state
   const scale = useSharedValue(1);
   const translateX = useSharedValue(0);
@@ -55,6 +63,18 @@ export default function ImageViewer({ uri }: Props) {
   // Pan — captured at gesture start
   const panStartTx = useSharedValue(0);
   const panStartTy = useSharedValue(0);
+
+  // Notify the parent when zoom crosses the 1× boundary so it can
+  // enable/disable FlatList paging accordingly.
+  useAnimatedReaction(
+    () => scale.value > 1.05,
+    (isZoomed, wasZoomed) => {
+      if (isZoomed !== wasZoomed && onZoomChange) {
+        runOnJS(onZoomChange)(isZoomed);
+      }
+    },
+    [onZoomChange],
+  );
 
   // ── pinch ──────────────────────────────────────────────────────────────────
   const pinchGesture = Gesture.Pinch()
@@ -94,6 +114,7 @@ export default function ImageViewer({ uri }: Props) {
 
   // ── pan (1 pointer only, so it won't fire during 2-finger pinch) ───────────
   const panGesture = Gesture.Pan()
+    .enabled(panEnabled)
     .maxPointers(1)
     .onStart(() => {
       panStartTx.value = translateX.value;

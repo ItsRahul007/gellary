@@ -4,6 +4,7 @@ import React, { useCallback } from 'react';
 import { Dimensions, Pressable, Text, View } from 'react-native';
 import { useGallery } from '@/context/GalleryContext';
 import type { MediaItem } from '@/types/gallery';
+import { setViewerItems } from '@/utils/viewerItems';
 
 const COLUMNS = 3;
 const GAP = 2;
@@ -18,10 +19,12 @@ function formatDuration(secs: number) {
 interface Props {
   item: MediaItem;
   index: number;
+  /** Override navigation — used by album screen to set its own ordered item list. */
+  onPress?: (item: MediaItem) => void;
 }
 
-export default function MediaCard({ item, index }: Props) {
-  const { isSelecting, selectedIds, toggleSelection, favoriteIds, getDisplayName } = useGallery();
+export default function MediaCard({ item, index, onPress }: Props) {
+  const { isSelecting, selectedIds, toggleSelection, favoriteIds, filteredItems } = useGallery();
   const isSelected = selectedIds.has(item.id);
   const isFavorite = favoriteIds.has(item.id);
   const isVideo = item.mediaType === 'video';
@@ -29,10 +32,14 @@ export default function MediaCard({ item, index }: Props) {
   const handlePress = useCallback(() => {
     if (isSelecting) {
       toggleSelection(item.id);
+    } else if (onPress) {
+      onPress(item);
     } else {
+      // Gallery navigation — viewer pages through the current filtered list
+      setViewerItems(filteredItems);
       router.push({ pathname: '/viewer/[id]', params: { id: item.id } });
     }
-  }, [isSelecting, item.id, toggleSelection]);
+  }, [isSelecting, item, toggleSelection, onPress, filteredItems]);
 
   const handleLongPress = useCallback(() => {
     toggleSelection(item.id);

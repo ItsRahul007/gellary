@@ -1,19 +1,26 @@
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import React, { useCallback } from 'react';
 import { FlatList, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useGallery } from '@/context/GalleryContext';
 import MediaCard from '@/components/gallery/MediaCard';
 import type { MediaItem } from '@/types/gallery';
+import { setViewerItems } from '@/utils/viewerItems';
 
 const COLUMNS = 3;
 
 export default function FavoritesScreen() {
   const { favoriteItems } = useGallery();
 
+  const handlePress = useCallback((item: MediaItem) => {
+    setViewerItems(favoriteItems);
+    router.push({ pathname: '/viewer/[id]', params: { id: item.id } });
+  }, [favoriteItems]);
+
   const renderItem = useCallback(({ item, index }: { item: MediaItem; index: number }) => (
-    <MediaCard item={item} index={index} />
-  ), []);
+    <MediaCard item={item} index={index} onPress={handlePress} />
+  ), [handlePress]);
 
   const keyExtractor = useCallback((item: MediaItem) => item.id, []);
 
