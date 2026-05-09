@@ -1,98 +1,117 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import FilterBar from "@/components/gallery/FilterBar";
+import MediaGrid from "@/components/gallery/MediaGrid";
+import SearchBar from "@/components/gallery/SearchBar";
+import SelectionBar from "@/components/gallery/SelectionBar";
+import SortMenu from "@/components/gallery/SortMenu";
+import { useGallery } from "@/context/GalleryContext";
+import { Ionicons } from "@expo/vector-icons";
+import React, { useEffect } from "react";
+import {
+  AppState,
+  Pressable,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+export default function GalleryScreen() {
+  const {
+    hasPermission,
+    needsDevBuild,
+    requestPermission,
+    recheckPermission,
+    filteredItems,
+    isSelecting,
+    viewMode,
+    setViewMode,
+  } = useGallery();
 
-export default function HomeScreen() {
+  // Re-check permission when the user returns from the Settings app
+  useEffect(() => {
+    const sub = AppState.addEventListener("change", (state) => {
+      if (state === "active") recheckPermission();
+    });
+    return () => sub.remove();
+  }, [recheckPermission]);
+
+  if (needsDevBuild) {
+    return (
+      <SafeAreaView className="flex-1 bg-black items-center justify-center px-8">
+        <Text className="text-6xl mb-6">🔧</Text>
+        <Text className="text-white text-2xl font-bold text-center mb-3">
+          Development Build Required
+        </Text>
+        <Text className="text-gray-400 text-base text-center mb-6">
+          Expo Go no longer supports full media library access on Android. Run
+          the command below to create a local dev build:
+        </Text>
+        <View className="bg-surface-2 rounded-xl px-4 py-3 w-full mb-8">
+          <Text className="text-green-400 font-mono text-sm text-center">
+            npx expo run:android
+          </Text>
+        </View>
+        <Text className="text-gray-600 text-xs text-center">
+          Or use EAS Build for a shareable build.{"\n"}
+          iOS users can continue using Expo Go.
+        </Text>
+      </SafeAreaView>
+    );
+  }
+
+  if (hasPermission === false) {
+    return (
+      <SafeAreaView className="flex-1 bg-black items-center justify-center px-8">
+        <Text className="text-6xl mb-6">📷</Text>
+        <Text className="text-white text-2xl font-bold text-center mb-3">
+          Access Your Gallery
+        </Text>
+        <Text className="text-gray-400 text-base text-center mb-8">
+          Allow access to your photos and videos to use the gallery.
+        </Text>
+        <TouchableOpacity
+          onPress={requestPermission}
+          activeOpacity={0.7}
+          style={{
+            backgroundColor: "#007AFF",
+            paddingHorizontal: 32,
+            paddingVertical: 16,
+            borderRadius: 16,
+            alignItems: "center",
+          }}
+        >
+          <Text className="text-white font-semibold text-base">
+            Give Access
+          </Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <SafeAreaView className="flex-1 bg-black" edges={["top"]}>
+      {/* Header */}
+      <View className="flex-row items-center px-4 pt-2 pb-1">
+        <Text className="text-white text-2xl font-bold flex-1">Gallery</Text>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+        <Pressable
+          onPress={() => setViewMode(viewMode === "grid" ? "list" : "grid")}
+          className="w-9 h-9 items-center justify-center rounded-full bg-surface-2 mr-2"
+        >
+          <Ionicons
+            name={viewMode === "grid" ? "list" : "grid"}
+            size={18}
+            color="#aaa"
+          />
+        </Pressable>
+        <SortMenu />
+      </View>
+
+      <SearchBar />
+      <FilterBar />
+      <MediaGrid />
+
+      {isSelecting && <SelectionBar />}
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
