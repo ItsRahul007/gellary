@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import {
   Dimensions,
   Modal,
@@ -21,8 +21,9 @@ import type { MediaItem } from '@/types/gallery';
 
 const { width: W, height: H } = Dimensions.get('window');
 
-// Each page is exactly the screen size
-function MediaPage({
+// Each page is exactly the screen size — memoised so only the current page
+// re-renders when zoom state changes (all others keep panEnabled=false).
+const MediaPage = memo(function MediaPage({
   item,
   onZoomChange,
   panEnabled,
@@ -38,7 +39,7 @@ function MediaPage({
         : <ImageViewer uri={item.uri} panEnabled={panEnabled} onZoomChange={onZoomChange} />}
     </View>
   );
-}
+});
 
 export default function ViewerScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -82,9 +83,13 @@ export default function ViewerScreen() {
 
   const renderItem = useCallback(
     ({ item }: { item: MediaItem }) => (
-      <MediaPage item={item} panEnabled={isZoomed} onZoomChange={setIsZoomed} />
+      <MediaPage
+        item={item}
+        panEnabled={item.id === currentId && isZoomed}
+        onZoomChange={setIsZoomed}
+      />
     ),
-    [isZoomed],
+    [currentId, isZoomed],
   );
 
   const keyExtractor = useCallback((item: MediaItem) => item.id, []);

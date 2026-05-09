@@ -212,7 +212,11 @@ export function GalleryProvider({ children }: { children: React.ReactNode }) {
       if (reset) {
         setMediaItems(items);
       } else {
-        setMediaItems((prev) => [...prev, ...items]);
+        setMediaItems((prev) => {
+          const existing = new Set(prev.map((i) => i.id));
+          const novel = items.filter((i) => !existing.has(i.id));
+          return novel.length > 0 ? [...prev, ...novel] : prev;
+        });
       }
 
       endCursorRef.current = result.endCursor;
@@ -236,6 +240,7 @@ export function GalleryProvider({ children }: { children: React.ReactNode }) {
                     MediaLibrary.MediaType.video,
                   ],
                 });
+
                 return {
                   id: a.id,
                   title: a.title,

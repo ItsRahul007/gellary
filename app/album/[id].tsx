@@ -1,17 +1,13 @@
 import MediaCard from "@/components/gallery/MediaCard";
 import { useGallery } from "@/context/GalleryContext";
 import type { MediaItem, MediaType } from "@/types/gallery";
+import { buildSections, mergeNewItems } from "@/utils/sectionBuilder";
+import type { DateSection, MediaRow } from "@/utils/sectionBuilder";
 import { setViewerItems } from "@/utils/viewerItems";
 import { Ionicons } from "@expo/vector-icons";
 import * as MediaLibrary from "expo-media-library";
 import { router, useLocalSearchParams } from "expo-router";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
@@ -28,54 +24,6 @@ const GAP = 2;
 const SCREEN_W = Dimensions.get("window").width;
 const CELL_SIZE = (SCREEN_W - GAP * (COLUMNS - 1)) / COLUMNS;
 const PAGE_SIZE = 100;
-
-type MediaRow = (MediaItem | null)[];
-interface DateSection {
-  title: string;
-  data: MediaRow[];
-}
-
-function getDateLabel(ts: number): string {
-  const date = new Date(ts);
-  const now = new Date();
-  const yest = new Date(now);
-  yest.setDate(yest.getDate() - 1);
-  if (date.toDateString() === now.toDateString()) return "Today";
-  if (date.toDateString() === yest.toDateString()) return "Yesterday";
-  const daysAgo = Math.floor((now.getTime() - date.getTime()) / 86_400_000);
-  if (daysAgo < 7)
-    return date.toLocaleDateString(undefined, {
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-    });
-  return date.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-}
-
-function buildSections(items: MediaItem[]): DateSection[] {
-  if (items.length === 0) return [];
-  const groups = new Map<string, MediaItem[]>();
-  for (const item of items) {
-    const key = getDateLabel(item.modificationTime);
-    if (!groups.has(key)) groups.set(key, []);
-    groups.get(key)!.push(item);
-  }
-  return Array.from(groups.entries()).map(([title, dayItems]) => {
-    const rows: MediaRow[] = [];
-    for (let i = 0; i < dayItems.length; i += COLUMNS) {
-      rows.push([
-        dayItems[i] ?? null,
-        dayItems[i + 1] ?? null,
-        dayItems[i + 2] ?? null,
-      ]);
-    }
-    return { title, data: rows };
-  });
-}
 
 function RowItem({ row, onPress }: { row: MediaRow; onPress: (item: MediaItem) => void }) {
   return (
@@ -107,6 +55,7 @@ export default function AlbumScreen() {
   const { mergeItems } = useGallery();
 
   const [items, setItems] = useState<MediaItem[]>([]);
+  const [sections, setSections] = useState<DateSection[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
@@ -131,7 +80,7 @@ export default function AlbumScreen() {
             MediaLibrary.MediaType.photo,
             MediaLibrary.MediaType.video,
           ],
-          sortBy: [MediaLibrary.SortBy.creationTime],
+          sortBy: [MediaLibrary.SortBy.modificationTime],
         });
 
         const mapped: MediaItem[] = result.assets.map((a) => ({
@@ -148,8 +97,13 @@ export default function AlbumScreen() {
           albumId: a.albumId,
         }));
 
-        if (reset) setItems(mapped);
-        else setItems((prev) => [...prev, ...mapped]);
+        if (reset) {
+          setItems(mapped);
+          setSections(buildSections(mapped));
+        } else {
+          setItems((prev) => [...prev, ...mapped]);
+          setSections((prev) => mergeNewItems(mapped, prev));
+        }
 
         // Make items available to the viewer via gallery context
         mergeItems(mapped);
@@ -170,8 +124,6 @@ export default function AlbumScreen() {
   useEffect(() => {
     loadItems(true);
   }, [loadItems]);
-
-  const sections = useMemo(() => buildSections(items), [items]);
 
   const handleItemPress = useCallback((item: MediaItem) => {
     setViewerItems(items);
