@@ -1,5 +1,7 @@
 import MediaCard from "@/components/gallery/MediaCard";
+import SelectionHeader from "@/components/gallery/SelectionHeader";
 import { useGallery } from "@/context/GalleryContext";
+import { useSelectionBackHandler } from "@/hooks/useSelectionBackHandler";
 import type { MediaItem, MediaType } from "@/types/gallery";
 import { buildSections, mergeNewItems } from "@/utils/sectionBuilder";
 import type { DateSection, MediaRow } from "@/utils/sectionBuilder";
@@ -52,7 +54,8 @@ export default function AlbumScreen() {
     id: string;
     title: string;
   }>();
-  const { mergeItems } = useGallery();
+  const { mergeItems, isSelecting } = useGallery();
+  useSelectionBackHandler();
 
   const [items, setItems] = useState<MediaItem[]>([]);
   const [sections, setSections] = useState<DateSection[]>([]);
@@ -193,27 +196,27 @@ export default function AlbumScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#000" }} edges={["top"]}>
-      {/* Header */}
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          paddingHorizontal: 16,
-          paddingVertical: 12,
-        }}
-      >
-        <Pressable onPress={() => router.back()} style={{ marginRight: 12 }}>
-          <Ionicons name="chevron-back" size={24} color="#fff" />
-        </Pressable>
-        <View style={{ flex: 1 }}>
-          <Text
-            style={{ color: "#fff", fontSize: 18, fontWeight: "700" }}
-            numberOfLines={1}
-          >
-            {titleParam ?? "Album"}
-          </Text>
+      {isSelecting ? (
+        <SelectionHeader />
+      ) : (
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            paddingHorizontal: 16,
+            paddingVertical: 12,
+          }}
+        >
+          <Pressable onPress={() => router.back()} style={{ marginRight: 12 }}>
+            <Ionicons name="chevron-back" size={24} color="#fff" />
+          </Pressable>
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: "#fff", fontSize: 18, fontWeight: "700" }} numberOfLines={1}>
+              {titleParam ?? "Album"}
+            </Text>
+          </View>
         </View>
-      </View>
+      )}
 
       {sections.length === 0 ? (
         <View

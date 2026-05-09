@@ -1,19 +1,14 @@
 import FilterBar from "@/components/gallery/FilterBar";
 import MediaGrid from "@/components/gallery/MediaGrid";
 import SearchBar from "@/components/gallery/SearchBar";
-import SelectionBar from "@/components/gallery/SelectionBar";
+import SelectionHeader from "@/components/gallery/SelectionHeader";
 import SortMenu from "@/components/gallery/SortMenu";
 import { useGallery } from "@/context/GalleryContext";
+import { useSelectionBackHandler } from "@/hooks/useSelectionBackHandler";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import React, { useEffect } from "react";
-import {
-  AppState,
-  Pressable,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { AppState, Pressable, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const AppLogo = () => (
@@ -35,7 +30,8 @@ export default function GalleryScreen() {
     setViewMode,
   } = useGallery();
 
-  // Re-check permission when the user returns from the Settings app
+  useSelectionBackHandler();
+
   useEffect(() => {
     const sub = AppState.addEventListener("change", (state) => {
       if (state === "active") recheckPermission();
@@ -88,9 +84,7 @@ export default function GalleryScreen() {
             alignItems: "center",
           }}
         >
-          <Text className="text-white font-semibold text-base">
-            Give Access
-          </Text>
+          <Text className="text-white font-semibold text-base">Give Access</Text>
         </TouchableOpacity>
       </SafeAreaView>
     );
@@ -98,28 +92,24 @@ export default function GalleryScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-black" edges={["top"]}>
-      {/* Header */}
-      <View className="flex-row items-center px-4 pt-2 pb-1">
-        <Text className="text-white text-2xl font-bold flex-1">Gallery</Text>
-
-        <Pressable
-          onPress={() => setViewMode(viewMode === "grid" ? "list" : "grid")}
-          className="w-9 h-9 items-center justify-center rounded-full bg-surface-2 mr-2"
-        >
-          <Ionicons
-            name={viewMode === "grid" ? "list" : "grid"}
-            size={18}
-            color="#aaa"
-          />
-        </Pressable>
-        <SortMenu />
-      </View>
+      {isSelecting ? (
+        <SelectionHeader />
+      ) : (
+        <View className="flex-row items-center px-4 pt-2 pb-1">
+          <Text className="text-white text-2xl font-bold flex-1">Gallery</Text>
+          <Pressable
+            onPress={() => setViewMode(viewMode === "grid" ? "list" : "grid")}
+            className="w-9 h-9 items-center justify-center rounded-full bg-surface-2 mr-2"
+          >
+            <Ionicons name={viewMode === "grid" ? "list" : "grid"} size={18} color="#aaa" />
+          </Pressable>
+          <SortMenu />
+        </View>
+      )}
 
       <SearchBar />
       <FilterBar />
       <MediaGrid />
-
-      {isSelecting && <SelectionBar />}
     </SafeAreaView>
   );
 }

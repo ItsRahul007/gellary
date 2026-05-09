@@ -1,3 +1,5 @@
+import SelectionHeader from '@/components/gallery/SelectionHeader';
+import { useSelectionBackHandler } from '@/hooks/useSelectionBackHandler';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useCallback } from 'react';
@@ -11,7 +13,8 @@ import { setViewerItems } from '@/utils/viewerItems';
 const COLUMNS = 3;
 
 export default function FavoritesScreen() {
-  const { favoriteItems } = useGallery();
+  const { favoriteItems, isSelecting } = useGallery();
+  useSelectionBackHandler();
 
   const handlePress = useCallback((item: MediaItem) => {
     setViewerItems(favoriteItems);
@@ -26,11 +29,15 @@ export default function FavoritesScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-black" edges={['top']}>
-      <View className="flex-row items-center px-4 pt-2 pb-3">
-        <Ionicons name="heart" size={22} color="#FF3B30" style={{ marginRight: 8 }} />
-        <Text className="text-white text-2xl font-bold">Favorites</Text>
-        <Text className="text-gray-500 text-sm ml-auto">{favoriteItems.length} items</Text>
-      </View>
+      {isSelecting ? (
+        <SelectionHeader />
+      ) : (
+        <View className="flex-row items-center px-4 pt-2 pb-3">
+          <Ionicons name="heart" size={22} color="#FF3B30" style={{ marginRight: 8 }} />
+          <Text className="text-white text-2xl font-bold">Favorites</Text>
+          <Text className="text-gray-500 text-sm ml-auto">{favoriteItems.length} items</Text>
+        </View>
+      )}
 
       {favoriteItems.length === 0 ? (
         <View className="flex-1 items-center justify-center">
