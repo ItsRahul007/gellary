@@ -27,16 +27,14 @@
         "android.permission.ACCESS_MEDIA_LOCATION",
         "android.permission.READ_MEDIA_IMAGES",
         "android.permission.READ_MEDIA_VIDEO",
-        "android.permission.READ_MEDIA_AUDIO",
-        "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
-        "android.permission.ACCESS_MEDIA_LOCATION",
-        "android.permission.READ_MEDIA_IMAGES",
-        "android.permission.READ_MEDIA_VIDEO",
         "android.permission.READ_MEDIA_AUDIO"
       ],
-      "package": "com.rahulghosh.gellary"
+      "package": "com.rahulghosh.gellary",
+      "enableProguardInRelease": true,
+      "enableShrinkResources": true,
+      "ndk": {
+        "abiFilters": ["arm64-v8a"]
+      }
     },
     "web": {
       "output": "static",
@@ -75,6 +73,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "184b68cc-280e-49b8-bbbc-3527c05afdad"
+      }
     }
   }
 }

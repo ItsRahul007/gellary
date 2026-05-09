@@ -38,7 +38,7 @@ export default function AlbumsScreen() {
           renderItem={renderItem}
           keyExtractor={keyExtractor}
           numColumns={2}
-          contentContainerStyle={{ paddingHorizontal: 8, paddingBottom: 100 }}
+          contentContainerStyle={{ paddingHorizontal: 8, paddingBottom: 140 }}
           showsVerticalScrollIndicator={false}
         />
       )}

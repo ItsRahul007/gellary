@@ -22,7 +22,7 @@ import { Linking } from "react-native";
 
 const FAVORITES_KEY = "@gallery_favorites";
 const CUSTOM_NAMES_KEY = "@gallery_custom_names";
-const PAGE_SIZE = 100;
+const PAGE_SIZE = 150;
 
 interface GalleryContextType {
   mediaItems: MediaItem[];
@@ -104,7 +104,10 @@ export function GalleryProvider({ children }: { children: React.ReactNode }) {
 
   async function checkPermission() {
     try {
-      const { status } = await MediaLibrary.getPermissionsAsync(false, ['photo', 'video']);
+      const { status } = await MediaLibrary.getPermissionsAsync(false, [
+        "photo",
+        "video",
+      ]);
       if (status === "granted") {
         setHasPermission(true);
         loadMedia();
@@ -124,7 +127,10 @@ export function GalleryProvider({ children }: { children: React.ReactNode }) {
 
   const requestPermission = useCallback(async () => {
     try {
-      const result = await MediaLibrary.requestPermissionsAsync(false, ['photo', 'video']);
+      const result = await MediaLibrary.requestPermissionsAsync(false, [
+        "photo",
+        "video",
+      ]);
       if (result.status === "granted") {
         setHasPermission(true);
         loadMedia();
@@ -148,7 +154,10 @@ export function GalleryProvider({ children }: { children: React.ReactNode }) {
     console.log("Running recheckPermission");
 
     try {
-      const { status } = await MediaLibrary.getPermissionsAsync(false, ['photo', 'video']);
+      const { status } = await MediaLibrary.getPermissionsAsync(false, [
+        "photo",
+        "video",
+      ]);
       if (status === "granted") {
         setHasPermission(true);
         loadMedia();
@@ -211,7 +220,9 @@ export function GalleryProvider({ children }: { children: React.ReactNode }) {
 
       // Only reload albums on first load / refresh, not on pagination
       if (reset) {
-        const albumsResult = await MediaLibrary.getAlbumsAsync({ includeSmartAlbums: true });
+        const albumsResult = await MediaLibrary.getAlbumsAsync({
+          includeSmartAlbums: true,
+        });
         const albumsWithCovers = await Promise.all(
           albumsResult
             .filter((a) => a.assetCount > 0)
@@ -220,9 +231,17 @@ export function GalleryProvider({ children }: { children: React.ReactNode }) {
                 const assets = await MediaLibrary.getAssetsAsync({
                   first: 1,
                   album: a.id,
-                  mediaType: [MediaLibrary.MediaType.photo, MediaLibrary.MediaType.video],
+                  mediaType: [
+                    MediaLibrary.MediaType.photo,
+                    MediaLibrary.MediaType.video,
+                  ],
                 });
-                return { id: a.id, title: a.title, assetCount: a.assetCount, coverUri: assets.assets[0]?.uri };
+                return {
+                  id: a.id,
+                  title: a.title,
+                  assetCount: a.assetCount,
+                  coverUri: assets.assets[0]?.uri,
+                };
               } catch {
                 return { id: a.id, title: a.title, assetCount: a.assetCount };
               }

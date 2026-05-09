@@ -39,7 +39,7 @@ export default function FavoritesScreen() {
           renderItem={renderItem}
           keyExtractor={keyExtractor}
           numColumns={COLUMNS}
-          contentContainerStyle={{ paddingBottom: 100 }}
+          contentContainerStyle={{ paddingBottom: 140 }}
           removeClippedSubviews
           maxToRenderPerBatch={18}
           windowSize={10}

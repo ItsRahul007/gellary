@@ -198,7 +198,7 @@ export default function MediaGrid() {
       renderSectionHeader={renderSectionHeader}
       keyExtractor={keyExtractor}
       style={{ backgroundColor: "#000" }}
-      contentContainerStyle={{ paddingBottom: 100 }}
+      contentContainerStyle={{ paddingBottom: 140 }}
       stickySectionHeadersEnabled={false}
       onEndReached={hasMore ? loadMore : undefined}
       onEndReachedThreshold={2}
