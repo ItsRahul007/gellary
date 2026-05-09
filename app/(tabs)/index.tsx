@@ -5,6 +5,7 @@ import SelectionBar from "@/components/gallery/SelectionBar";
 import SortMenu from "@/components/gallery/SortMenu";
 import { useGallery } from "@/context/GalleryContext";
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import React, { useEffect } from "react";
 import {
   AppState,
@@ -15,13 +16,20 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+const AppLogo = () => (
+  <Image
+    source={require("@/assets/images/app-logo.png")}
+    style={{ width: 96, height: 96, marginBottom: 24 }}
+    contentFit="contain"
+  />
+);
+
 export default function GalleryScreen() {
   const {
     hasPermission,
     needsDevBuild,
     requestPermission,
     recheckPermission,
-    filteredItems,
     isSelecting,
     viewMode,
     setViewMode,
@@ -38,7 +46,7 @@ export default function GalleryScreen() {
   if (needsDevBuild) {
     return (
       <SafeAreaView className="flex-1 bg-black items-center justify-center px-8">
-        <Text className="text-6xl mb-6">🔧</Text>
+        <AppLogo />
         <Text className="text-white text-2xl font-bold text-center mb-3">
           Development Build Required
         </Text>
@@ -62,7 +70,7 @@ export default function GalleryScreen() {
   if (hasPermission === false) {
     return (
       <SafeAreaView className="flex-1 bg-black items-center justify-center px-8">
-        <Text className="text-6xl mb-6">📷</Text>
+        <AppLogo />
         <Text className="text-white text-2xl font-bold text-center mb-3">
           Access Your Gallery
         </Text>

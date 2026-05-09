@@ -22,7 +22,7 @@ function TabIcon({ name, focused }: { name: string; focused: boolean }) {
       <Ionicons
         name={name as any}
         size={22}
-        color={focused ? "#007AFF" : "#636366"}
+        color={focused ? "#007AFF" : "#8E8E93"}
       />
     </View>
   );
@@ -42,9 +42,18 @@ export default function TabLayout() {
           height: 40,
           overflow: "hidden",
           borderWidth: 0,
+          backgroundColor: "#1C1C1E",
+          borderColor: "#1C1C1E",
+          // shadow
+          elevation: 12,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.3,
+          shadowRadius: 8,
         },
         tabBarItemStyle: {
           height: 45,
+          backgroundColor: "#1C1C1E",
         },
       }}
     >
