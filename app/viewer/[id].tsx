@@ -27,15 +27,17 @@ const MediaPage = memo(function MediaPage({
   item,
   onZoomChange,
   panEnabled,
+  isActive,
 }: {
   item: MediaItem;
   panEnabled: boolean;
   onZoomChange: (z: boolean) => void;
+  isActive: boolean;
 }) {
   return (
     <View style={{ width: W, height: H, backgroundColor: '#000' }}>
       {item.mediaType === 'video'
-        ? <VideoPlayer uri={item.uri} />
+        ? <VideoPlayer uri={item.uri} isActive={isActive} />
         : <ImageViewer uri={item.uri} panEnabled={panEnabled} onZoomChange={onZoomChange} />}
     </View>
   );
@@ -87,6 +89,7 @@ export default function ViewerScreen() {
         item={item}
         panEnabled={item.id === currentId && isZoomed}
         onZoomChange={setIsZoomed}
+        isActive={item.id === currentId}
       />
     ),
     [currentId, isZoomed],

@@ -14,9 +14,11 @@ function formatTime(secs: number) {
 
 interface Props {
   uri: string;
+  /** Pause playback when this page is swiped off-screen. */
+  isActive?: boolean;
 }
 
-export default function VideoPlayer({ uri }: Props) {
+export default function VideoPlayer({ uri, isActive = true }: Props) {
   const [showControls, setShowControls] = useState(true);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -27,6 +29,11 @@ export default function VideoPlayer({ uri }: Props) {
     p.loop = false;
     p.timeUpdateEventInterval = 0.25; // fire timeUpdate every 250 ms
   });
+
+  // Pause whenever this page is swiped off-screen
+  useEffect(() => {
+    if (!isActive) player.pause();
+  }, [isActive, player]);
 
   useEffect(() => {
     const statusSub = player.addListener('statusChange', ({ status }) => {
