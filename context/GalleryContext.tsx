@@ -329,7 +329,10 @@ export function GalleryProvider({ children }: { children: React.ReactNode }) {
   const deleteItems = useCallback(
     async (ids: string[]) => {
       try {
-        await MediaLibrary.deleteAssetsAsync(ids);
+        const isDeleted = await MediaLibrary.deleteAssetsAsync(ids);
+
+        if (!isDeleted) return;
+
         setMediaItems((prev) => prev.filter((i) => !ids.includes(i.id)));
         setFavoriteIds((prev) => {
           const next = new Set(prev);
